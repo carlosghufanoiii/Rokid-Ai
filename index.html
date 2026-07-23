@@ -26,7 +26,7 @@
     background: linear-gradient(90deg, rgba(34,211,238,0.05), rgba(34,211,238,0.10), rgba(34,211,238,0.05));
   }
   .listen__label { font-size: 12px; letter-spacing: 3px; color: var(--cyan); text-transform: uppercase; white-space: nowrap; }
-  .wave { display: flex; align-items: center; gap: 3px; height: 34px; flex: 1; justify-content: center; }
+  .wave { display: flex; align-items: center; gap: 3px; height: 34px; flex: 1 1 0; min-width: 0; overflow: hidden; justify-content: center; }
   .wave span {
     width: 3px; border-radius: 2px; background: var(--cyan-soft);
     animation: wave 1.1s ease-in-out infinite;
@@ -146,6 +146,9 @@
 
   .toplink { position: fixed; right: 16px; bottom: 16px; z-index: 20; }
 
+  /* Let grid/flex children shrink below their content width */
+  .grid > *, .col, .conv, .nav, .topbar > * { min-width: 0; }
+
   @media (max-width: 1280px) {
     .grid { grid-template-columns: 1fr 1fr; }
     .topbar { grid-template-columns: 1fr; }
@@ -154,6 +157,9 @@
   @media (max-width: 720px) {
     .grid { grid-template-columns: 1fr; }
     .strip { grid-template-columns: 1fr; }
+    .listen { padding: 8px 12px; gap: 10px; }
+    .listen__label { font-size: 10px; letter-spacing: 1px; }
+    #wave2 { display: none; }
   }
 </style>
 </head>
