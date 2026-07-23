@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sunday AI Assistant — Dashboard</title>
+<meta name="description" content="Sunday — your personal AI assistant for coding, automation and productivity." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='none' stroke='%2322d3ee' stroke-width='6'/><circle cx='50' cy='50' r='14' fill='%2322d3ee'/></svg>" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<style>
+  /* ---------- Dashboard layout ---------- */
+  .app { display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh; gap: 14px; padding: 14px; }
+
+  /* Top bar */
+  .topbar { display: grid; grid-template-columns: 260px 1fr 300px; gap: 14px; align-items: center; }
+  .topbar__brand { padding: 8px 4px; }
+  .topbar__brand .brand__logo {
+    animation: spin 14s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .listen {
+    display: flex; align-items: center; gap: 16px; justify-content: center;
+    padding: 10px 22px; border-radius: 999px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(90deg, rgba(34,211,238,0.05), rgba(34,211,238,0.10), rgba(34,211,238,0.05));
+  }
+  .listen__label { font-size: 12px; letter-spacing: 3px; color: var(--cyan); text-transform: uppercase; white-space: nowrap; }
+  .wave { display: flex; align-items: center; gap: 3px; height: 34px; flex: 1; justify-content: center; }
+  .wave span {
+    width: 3px; border-radius: 2px; background: var(--cyan-soft);
+    animation: wave 1.1s ease-in-out infinite;
+  }
+  @keyframes wave { 0%,100% { height: 5px; opacity:.5;} 50% { height: 28px; opacity:1;} }
+  .mic-btn {
+    width: 56px; height: 56px; border-radius: 50%; flex: none;
+    display: grid; place-items: center; cursor: pointer;
+    border: 1px solid var(--panel-border-strong);
+    background: radial-gradient(circle at 50% 40%, rgba(34,211,238,0.3), rgba(11,17,32,0.9));
+    box-shadow: var(--glow); transition: transform .15s;
+  }
+  .mic-btn:hover { transform: scale(1.06); }
+  .mic-btn svg { width: 24px; height: 24px; stroke: var(--cyan); }
+
+  .topbar__user { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+  .topbar__user .greet { text-align: right; }
+  .topbar__user .greet b { font-size: 15px; }
+  .topbar__user .greet small { color: var(--text-faint); font-size: 11px; display: block; }
+  .avatar { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--panel-border-strong);
+    background: linear-gradient(135deg, #1e3a5f, #0b1120); display:grid; place-items:center; font-weight:700; color: var(--cyan); }
+
+  /* Main 3-col grid */
+  .grid { display: grid; grid-template-columns: 240px 300px 1fr 320px; gap: 14px; align-items: stretch; }
+
+  /* Sidebar nav */
+  .nav { padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+  .nav__item {
+    display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px;
+    color: var(--text-dim); cursor: pointer; font-size: 14px; transition: all .15s;
+  }
+  .nav__item svg { width: 18px; height: 18px; flex: none; opacity: .85; }
+  .nav__item:hover { background: rgba(56,189,248,0.08); color: var(--text); }
+  .nav__item--active { background: rgba(34,211,238,0.14); color: var(--cyan); border: 1px solid var(--panel-border-strong); }
+  .nav__orb { margin-top: auto; display: grid; place-items: center; gap: 8px; padding: 18px 0 6px; }
+  .orb {
+    width: 92px; height: 92px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 42%, rgba(34,211,238,0.55), rgba(11,17,32,0.2) 68%);
+    border: 1px solid var(--panel-border-strong);
+    box-shadow: 0 0 30px rgba(34,211,238,0.4), inset 0 0 30px rgba(34,211,238,0.25);
+    animation: pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{ transform: scale(1); opacity:.9;} 50%{ transform: scale(1.06); opacity:1;} }
+  .nav__orb b { letter-spacing: 4px; font-size: 15px; }
+  .nav__orb small { letter-spacing: 3px; font-size: 10px; color: var(--cyan); }
+
+  /* Cards column */
+  .col { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+  .card { padding: 16px; }
+  .card__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+
+  .project { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid rgba(56,189,248,0.08); }
+  .project:last-child { border-bottom: none; }
+  .project__ico { width: 34px; height: 34px; border-radius: 9px; display:grid; place-items:center; background: rgba(56,189,248,0.1); }
+  .project__ico svg { width: 18px; height: 18px; stroke: var(--cyan-soft); }
+  .project b { font-size: 13.5px; display: block; }
+  .project small { font-size: 11px; color: var(--text-faint); }
+
+  .gauges { display: flex; justify-content: space-around; margin: 4px 0 14px; }
+  .gauge { text-align: center; }
+  .gauge svg { width: 66px; height: 66px; transform: rotate(-90deg); }
+  .gauge__val { font-size: 15px; font-weight: 700; margin-top: -44px; position: relative; }
+  .meter { margin: 10px 0; }
+  .meter__top { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+  .meter__bar { height: 6px; border-radius: 999px; background: rgba(56,189,248,0.12); overflow: hidden; }
+  .meter__fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--cyan), var(--cyan-soft)); }
+
+  /* Center conversation */
+  .conv { padding: 18px; display: flex; flex-direction: column; min-height: 0; }
+  .conv__brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .conv__body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 6px; }
+  .bubble { max-width: 78%; padding: 13px 16px; border-radius: 14px; font-size: 14px; }
+  .bubble small { display:block; font-size: 10px; color: var(--text-faint); margin-top: 6px; }
+  .bubble--ai { align-self: flex-start; background: rgba(56,189,248,0.08); border: 1px solid var(--panel-border); border-top-left-radius: 4px; }
+  .bubble--me { align-self: flex-end; background: rgba(34,211,238,0.16); border: 1px solid var(--panel-border-strong); border-top-right-radius: 4px; }
+  .tasklist { align-self: stretch; border: 1px solid var(--panel-border); border-radius: 14px; padding: 14px 16px; background: rgba(9,14,26,0.6); }
+  .task { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; font-size: 13.5px; }
+  .task__l { display: flex; gap: 10px; }
+  .task__n { color: var(--text-faint); width: 14px; }
+  .task__s { font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .s-done { color: var(--green); } .s-prog { color: var(--cyan); } .s-pend { color: var(--text-faint); }
+  .tasklist__foot { display: flex; justify-content: space-between; border-top: 1px solid rgba(56,189,248,0.1); margin-top: 8px; padding-top: 10px; font-size: 13px; }
+
+  .composer { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 8px 10px 8px 14px;
+    border: 1px solid var(--panel-border-strong); border-radius: 999px; background: rgba(9,14,26,0.7); }
+  .composer input { flex: 1; background: none; border: none; color: var(--text); font-size: 14px; outline: none; font-family: var(--font); }
+  .composer button { width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer; display:grid; place-items:center;
+    background: rgba(34,211,238,0.2); }
+  .composer button svg { width: 18px; height:18px; stroke: var(--cyan); }
+  .quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+  /* Right column */
+  .activity { display: flex; align-items: flex-start; gap: 11px; padding: 9px 0; border-bottom: 1px solid rgba(56,189,248,0.07); font-size: 13px; }
+  .activity:last-child { border-bottom: none; }
+  .activity__ico { width: 26px; height: 26px; border-radius: 7px; display:grid; place-items:center; flex:none; background: rgba(56,189,248,0.1); }
+  .activity__ico svg { width: 14px; height: 14px; }
+  .activity .grow small { color: var(--text-faint); font-size: 11px; }
+  .activity time { font-size: 11px; color: var(--text-faint); white-space: nowrap; }
+
+  .agent { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
+  .agent__ico { width: 32px; height: 32px; border-radius: 9px; display:grid; place-items:center; background: rgba(56,189,248,0.1); font-size: 15px; }
+  .agent b { font-size: 13.5px; display: block; }
+  .agent small { font-size: 11px; color: var(--text-faint); }
+
+  .voice-ctl { display: grid; place-items: center; gap: 12px; padding: 10px 0 4px; }
+  .voice-ctl .mic-btn { width: 76px; height: 76px; }
+  .voice-ctl .mic-btn svg { width: 30px; height: 30px; }
+
+  /* Bottom status strip */
+  .strip { display: grid; grid-template-columns: repeat(5, 1fr) 1.4fr; gap: 14px; }
+  .strip .panel { padding: 12px 14px; display: flex; align-items: center; gap: 11px; }
+  .strip__ico { width: 30px; height:30px; border-radius: 8px; display:grid; place-items:center; background: rgba(56,189,248,0.1); flex:none; }
+  .strip__ico svg { width: 16px; height:16px; stroke: var(--cyan-soft); }
+  .strip b { font-size: 13px; display:block; } .strip small { font-size: 11px; color: var(--text-faint); }
+  .quote { font-style: italic; color: var(--text-dim); font-size: 13px; }
+  .quote span { color: var(--cyan); font-style: normal; }
+
+  .toplink { position: fixed; right: 16px; bottom: 16px; z-index: 20; }
+
+  @media (max-width: 1280px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .topbar { grid-template-columns: 1fr; }
+    .strip { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+    .strip { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== TOP BAR ===== -->
+  <header class="topbar">
+    <div class="topbar__brand brand">
+      <div class="brand__logo">
+        <svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="38" stroke="#22d3ee" stroke-width="5"/><path d="M28 62 L50 26 L72 62" stroke="#22d3ee" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="52" r="9" fill="#22d3ee"/></svg>
+      </div>
+      <div>
+        <div class="brand__name">SUNDAY</div>
+        <div class="brand__tag">AI Assistant</div>
+      </div>
+    </div>
+
+    <div class="listen panel">
+      <span class="listen__label">Listening…</span>
+      <div class="wave" id="wave"></div>
+      <button class="mic-btn" aria-label="Microphone">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+      </button>
+      <div class="wave" id="wave2"></div>
+    </div>
+
+    <div class="topbar__user">
+      <div class="greet">
+        <b>Good morning, Boss.</b>
+        <small id="clock">Sunday • 10:30 AM</small>
+        <small class="badge badge--green">● ONLINE</small>
+      </div>
+      <div class="avatar">S</div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN GRID ===== -->
+  <main class="grid">
+
+    <!-- Sidebar -->
+    <nav class="nav panel">
+      <div class="nav__item nav__item--active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Dashboard</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16v11H8l-4 4z"/></svg> Chat</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg> Voice Commands</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h18v13H3z"/><path d="M3 9h18"/></svg> Projects</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg> Code Assistant</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v3M12 18v3M4.2 4.2l2 2M17.8 17.8l2 2M3 12h3M18 12h3"/><circle cx="12" cy="12" r="3.5"/></svg> Dev Tools</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg> System Control</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg> Smart Home</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg> Calendar</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg> Reminders</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/></svg> Files &amp; Docs</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="6" rx="1.5"/><rect x="3" y="13" width="18" height="6" rx="1.5"/></svg> Server Monitor</div>
+      <div class="nav__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.3 1a7 7 0 0 0-1.7-1l-.3-2.5H10.4l-.3 2.5a7 7 0 0 0-1.7 1l-2.3-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 1.7 1l.3 2.5h3.2l.3-2.5a7 7 0 0 0 1.7-1l2.3 1 2-3.4-2-1.5a7 7 0 0 0 .1-1z"/></svg> Settings</div>
+
+      <div class="nav__orb">
+        <div class="orb"></div>
+        <b>SUNDAY</b>
+        <small>ACTIVE</small>
+      </div>
+    </nav>
+
+    <!-- Column: Projects + System status -->
+    <section class="col">
+      <div class="card panel">
+        <div class="card__head"><span class="panel__title">Active Projects</span><span class="pill">+ New Project</span></div>
+        <div class="project"><div class="project__ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 7h6l2 2h10v11H3z"/></svg></div><div class="grow"><b>MAGIA Platform</b><small>D:\Projects\MAGIA</small></div><span class="badge badge--green">Running</span></div>
+        <div class="project"><div class="project__ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 7h6l2 2h10v11H3z"/></svg></div><div class="grow"><b>YG Ran Website</b><small>D:\Projects\YGRan</small></div><span class="badge badge--cyan">Active</span></div>
+        <div class="project"><div class="project__ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 7h6l2 2h10v11H3z"/></svg></div><div class="grow"><b>Mobile App</b><small>D:\Projects\SundayApp</small></div><span class="badge badge--cyan">Active</span></div>
+        <div class="project"><div class="project__ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 7h6l2 2h10v11H3z"/></svg></div><div class="grow"><b>AI Assistant</b><small>D:\Projects\SundayAI</small></div><span class="faint" style="font-size:11px">Planning</span></div>
+        <div class="project"><div class="project__ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg></div><div class="grow"><b>E-Commerce</b><small>D:\Projects\MagiaShop</small></div><span class="badge badge--amber">Paused</span></div>
+      </div>
+
+      <div class="card panel grow">
+        <div class="card__head"><span class="panel__title">System Status</span></div>
+        <div class="gauges">
+          <div class="gauge"><svg viewBox="0 0 66 66"><circle cx="33" cy="33" r="28" stroke="rgba(56,189,248,.15)" stroke-width="6" fill="none"/><circle cx="33" cy="33" r="28" stroke="#22d3ee" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="127"/></svg><div class="gauge__val">28%</div><small class="faint">CPU</small></div>
+          <div class="gauge"><svg viewBox="0 0 66 66"><circle cx="33" cy="33" r="28" stroke="rgba(56,189,248,.15)" stroke-width="6" fill="none"/><circle cx="33" cy="33" r="28" stroke="#38bdf8" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="95"/></svg><div class="gauge__val">46%</div><small class="faint">RAM</small></div>
+          <div class="gauge"><svg viewBox="0 0 66 66"><circle cx="33" cy="33" r="28" stroke="rgba(56,189,248,.15)" stroke-width="6" fill="none"/><circle cx="33" cy="33" r="28" stroke="#34d399" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="111"/></svg><div class="gauge__val">37%</div><small class="faint">GPU</small></div>
+        </div>
+        <div class="meter"><div class="meter__top"><span>Storage</span><span class="faint">512 GB / 1 TB</span></div><div class="meter__bar"><div class="meter__fill" style="width:51%"></div></div></div>
+        <div class="meter"><div class="meter__top"><span>Battery</span><span class="faint">72%</span></div><div class="meter__bar"><div class="meter__fill" style="width:72%"></div></div></div>
+        <div class="meter"><div class="meter__top"><span>Network</span><span class="faint">↑ 45 Mbps · ↓ 32 Mbps</span></div><div class="meter__bar"><div class="meter__fill" style="width:64%"></div></div></div>
+      </div>
+    </section>
+
+    <!-- Center: conversation -->
+    <section class="conv panel">
+      <div class="conv__brand">
+        <div class="brand__logo" style="width:34px;height:34px"><svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="38" stroke="#22d3ee" stroke-width="6"/><circle cx="50" cy="50" r="12" fill="#22d3ee"/></svg></div>
+        <b style="letter-spacing:2px">SUNDAY AI</b>
+      </div>
+      <div class="conv__body">
+        <div class="bubble bubble--ai">Good morning, Boss. How can I help you today?<small>10:30 AM</small></div>
+        <div class="bubble bubble--me">Review the login system of MAGIA and fix the role permission bug. Then update me.<small>10:30 AM</small></div>
+        <div class="tasklist">
+          <div style="margin-bottom:6px">Understood. I'll handle this for you.</div>
+          <div class="task"><div class="task__l"><span class="task__n">1.</span> Analyzing codebase with Claude Code…</div><span class="task__s s-done">✔ Completed</span></div>
+          <div class="task"><div class="task__l"><span class="task__n">2.</span> Identifying issues…</div><span class="task__s s-done">✔ Completed</span></div>
+          <div class="task"><div class="task__l"><span class="task__n">3.</span> Creating implementation plan…</div><span class="task__s s-done">✔ Completed</span></div>
+          <div class="task"><div class="task__l"><span class="task__n">4.</span> Implementing fix with Codex…</div><span class="task__s s-prog">◐ In Progress</span></div>
+          <div class="task"><div class="task__l"><span class="task__n">5.</span> Running tests…</div><span class="task__s s-pend">○ Pending</span></div>
+          <div class="task"><div class="task__l"><span class="task__n">6.</span> Updating documentation…</div><span class="task__s s-pend">○ Pending</span></div>
+          <div class="task"><div class="task__l"><span class="task__n">7.</span> Summary and update…</div><span class="task__s s-pend">○ Pending</span></div>
+          <div class="tasklist__foot"><span>Claude Code <span class="faint">(Analysis)</span></span><span class="badge badge--cyan">View</span></div>
+          <div class="tasklist__foot" style="border:none;padding-top:4px"><span>Codex <span class="faint">(Implementation)</span></span><span class="badge badge--cyan">Running…</span></div>
+        </div>
+      </div>
+      <div class="composer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" width="20" height="20"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+        <input id="msg" placeholder="Message Sunday…" />
+        <button id="send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+      </div>
+      <div class="quick">
+        <span class="pill">Open VS Code</span><span class="pill">Run Tests</span><span class="pill">Check Servers</span><span class="pill">Git Status</span><span class="pill">Open Browser</span>
+      </div>
+    </section>
+
+    <!-- Right column -->
+    <section class="col">
+      <div class="card panel">
+        <div class="card__head"><span class="panel__title">Recent Activity</span><span class="pill">View All</span></div>
+        <div class="activity"><div class="activity__ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.7"><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg></div><div class="grow"><b style="font-weight:500">Updated: user.service.ts</b></div><time>10:28 AM</time></div>
+        <div class="activity"><div class="activity__ico"><svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.7"><path d="M5 4h9l5 5v11H5z"/></svg></div><div class="grow"><b style="font-weight:500">Implemented role permissions</b></div><time>10:26 AM</time></div>
+        <div class="activity"><div class="activity__ico"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M9 12l2 2 4-4"/></svg></div><div class="grow"><b style="font-weight:500">Fixed bug in auth middleware</b></div><time>10:22 AM</time></div>
+        <div class="activity"><div class="activity__ico"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.7"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="8"/></svg></div><div class="grow"><b style="font-weight:500">Ran 45 unit tests</b></div><time>10:20 AM</time></div>
+        <div class="activity"><div class="activity__ico"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.7"><path d="M4 16l6-6 4 4 6-8"/></svg></div><div class="grow"><b style="font-weight:500">Deployed to staging</b></div><time>Yesterday</time></div>
+        <div class="activity"><div class="activity__ico"><svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.7"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/></svg></div><div class="grow"><b style="font-weight:500">Database backup completed</b></div><time>Yesterday</time></div>
+      </div>
+
+      <div class="card panel">
+        <div class="card__head"><span class="panel__title">AI Agents</span></div>
+        <div class="agent"><div class="agent__ico">🧠</div><div class="grow"><b>GPT Agent</b><small>General Assistant</small></div><span class="badge badge--green">ONLINE</span></div>
+        <div class="agent"><div class="agent__ico">🅰️</div><div class="grow"><b>Claude Agent</b><small>Analysis &amp; Planning</small></div><span class="badge badge--green">ONLINE</span></div>
+        <div class="agent"><div class="agent__ico">⚙️</div><div class="grow"><b>Codex Agent</b><small>Code Implementation</small></div><span class="badge badge--green">ONLINE</span></div>
+      </div>
+
+      <div class="card panel grow">
+        <div class="card__head"><span class="panel__title">Voice Control</span></div>
+        <div class="voice-ctl">
+          <button class="mic-btn" aria-label="Tap to speak"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg></button>
+          <div class="row gap-sm"><span class="faint" style="font-size:12px">Tap to speak</span></div>
+          <div class="row gap-sm"><small class="faint">Wake Word</small><span class="pill pill--on">ON</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== BOTTOM STRIP ===== -->
+  <footer class="strip">
+    <div class="panel"><div class="strip__ico"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div><div><b>Next Meeting</b><small>11:00 AM · Project Sync</small></div></div>
+    <div class="panel"><div class="strip__ico"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="6" rx="1"/><rect x="3" y="13" width="18" height="6" rx="1"/></svg></div><div><b>Server Status</b><small>All Systems Operational</small></div><span class="status-dot status-dot--green" style="margin-left:auto"></span></div>
+    <div class="panel"><div class="strip__ico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15a4 4 0 0 1 1-7.9A5 5 0 0 1 19 9a3.5 3.5 0 0 1-.5 6z"/></svg></div><div><b>28°C</b><small>Partly Cloudy</small></div></div>
+    <div class="panel"><div class="strip__ico"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg></div><div><b>Calendar</b><small>3 events today</small></div></div>
+    <div class="panel"><div class="strip__ico"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div><div><b>Reminders</b><small>2 pending</small></div></div>
+    <div class="panel"><div class="quote">"The best way to predict the future is to create it." <span>— Peter Drucker</span></div></div>
+  </footer>
+</div>
+
+<a class="pill toplink" href="flowchart.html">View Architecture Flowchart →</a>
+
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>
